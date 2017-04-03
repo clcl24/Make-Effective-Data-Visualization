@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://dimplejs.org/dist/dimple.v2.0.0.min.js"></script>
+  <style>
+    h2 {
+      text-align: center;
+      color: #19419C;
+      font-family: helvetica;
+    }
+
+    h5 {
+      text-align: center;
+      color: #3E82BF;
+      font-family: helvetica;
+    }
+
+
+  </style>
+    <script type="text/javascript">
+      function draw(data) {
+
+      /*
+        D3.js setup code
+      */
+          "use strict";
+          var margin = 75,
+              width = 1500 - margin,
+              height = 1000 - margin;
+
+          d3.select("body")
+            .append("h2")
+            .text("Batting Average and Home Run vs. Handedness and Height")
+            .append("h5")
+            .text("This a visualization of a dataset that contains 1,157 baseball \
+            players including balsball players' handedness (right handed, left \
+            handed,or both handed), height, weight, batting average, and home runs. \
+            Players' performance can be measured as their batting average and the \
+            number of home run, and their characteristics are handedness, height")
+            .append("h5")
+            .text("(1) Smaller players are better at batting, especially for those \
+            heights that are lower than 76 inches. For the 67 inches height, \
+            players has highest batting average and highest home runs except \
+            for 67 inches height. (2)Medium players whose heights are 68 inches \
+            and 75 inches are more constant in their home run rates. Also, among \
+            these playes, who are left handed seems like having higer batting \
+            average except for who are 69 inches height. (3) Left-handed players \
+            are better at both, batting and doing HRs. Both-handed plyesrs are \
+            not good at home runs except for height 67 and 76 inches. Right-handed \
+            players have lowest batting average compared to other two types of handedness.");
+
+
+          var svg = d3.select("body")
+            .append("svg")
+              .attr("width", width + margin)
+              .attr("height", height + margin)
+            .append('g')
+                .attr('class','chart');
+
+      /*
+        Dimple.js Chart construction code
+      */
+
+          data.forEach(function(d) {
+            // create new feature HRsqrt
+              d["HRsqrt"] = Math.sqrt(+d.HR);
+          });
+
+          var myChart = new dimple.chart(svg, data);
+          var x = myChart.addCategoryAxis("x", ["height","handedness"]);
+          x.title = "Player's Height(inches)"
+          x.showGridlines = true;
+
+          var y = myChart.addMeasureAxis("y", "avg");
+          // y.tickFormat = ".3f"
+          y.title = "Average of player's batting performnace (avg)"
+
+          var z = myChart.addMeasureAxis("z", "HRsqrt");
+
+          var bubble= myChart.addSeries(["handedness"], dimple.plot.bubble);
+
+          var line = myChart.addSeries(["handedness"], dimple.plot.line);
+          line.lineWeight = 1;
+
+          bubble.aggregate = dimple.aggregateMethod.avg;
+          line.aggregate = dimple.aggregateMethod.avg;
+
+          myChart.addLegend(100, 10, 1100, 20, "right");
+
+          bubble.getTooltipText = function(d) {
+                return ["Height: " + d.cx, "Mean Batting Average: "
+                + d.cy, "Total Home Runs: " + Math.round( d.cz*d.cz )];
+              };
+
+          myChart.draw();
+
+        };
+      </script>
+  </head>
+<body>
+  <script type="text/javascript">
+  /*
+    Use D3 (not dimple.js) to load the CSV file
+    and pass the contents of it to the draw function
+    */
+  d3.csv("baseball_data.csv", draw);
+  </script>
+</body>
+</html>
